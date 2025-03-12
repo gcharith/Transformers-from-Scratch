@@ -126,7 +126,7 @@ class encoderBlock(nn.Module):
 
         return x
     
-class encoder(nn.Module):
+class Encoder(nn.Module):
     def __init__(self, layers: nn.ModuleList)->None:
         super().__init__()
         self.layers = layers
@@ -154,7 +154,7 @@ class decoderBlock(nn.Module):
 
         return x
     
-class decoder(nn.Module):
+class Decoder(nn.Module):
     def __init__(self, layers: nn.ModuleList):
         super().__init__()
         self.layers = layers
@@ -164,3 +164,15 @@ class decoder(nn.Module):
         for layer in self.layers:
             x = layer(x, encoder_output, src_mask, target_mask)
         return self.norm(x)
+    
+class Linear(nn.Module):
+    def __init__(self, d_model: int, vocab_size: int) -> None:
+        super().__init__()
+        self.linearProj = nn.Linear(d_model,vocab_size)
+    
+    def forward(self, x):
+        return torch.log_softmax(self.linearProj(x),dim=-1)
+
+class Transformer(nn.Module):
+    def __init__(self, encoder:Encoder, decoder: Decoder, in_embed:inputEmbeddings, out_embed: inputEmbeddings, in_pos: positionalEncoding, ):
+        super().__init__()
