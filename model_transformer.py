@@ -174,5 +174,29 @@ class Linear(nn.Module):
         return torch.log_softmax(self.linearProj(x),dim=-1)
 
 class Transformer(nn.Module):
-    def __init__(self, encoder:Encoder, decoder: Decoder, in_embed:inputEmbeddings, out_embed: inputEmbeddings, in_pos: positionalEncoding, ):
+    def __init__(self, encoder:Encoder, decoder: Decoder, in_embed:inputEmbeddings, out_embed: inputEmbeddings, in_pos: positionalEncoding, out_pos: positionalEncoding, linear: Linear):
         super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.in_embed = in_embed
+        self.out_embed = out_embed
+        self.in_pos = in_pos
+        self.out_pos = out_pos
+        self.linear = linear
+
+    def encode(self, input, src_mask):
+        input = self.in_embed(input)
+        input = self.in_pos(input)
+
+        return self.encoder(input, src_mask)
+    
+    def decode(self, encoder_output, src_mask, tgt_mask):
+        tgt = self.out_embed(tgt)
+        tgt = self.out_pos(tgt)
+
+        return self.decode(tgt, encoder_output, src_mask, tgt_mask)
+    
+    def linear_project(self,x):
+        return self.linear(x)
+    
+
