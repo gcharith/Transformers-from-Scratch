@@ -38,4 +38,15 @@ class positionalEncoding(nn.Module):
         x = x + (self.pos_enc[:,:x.shape[1],:]).requires_grad(False) # adding the positional encoding to the input embedding. making positional encoding values nonlearnable since they are fixed
         return self.dropout(x)
 
+class layerNormalization(nn.Module):
+    def __init__(self, epsilon: float = 10**-6) -> None:
+        super().__init__()
+        self.epsilon = epsilon
+        self.alpha = nn.Parameter(torch.ones(1)) #multiplication scaler
+        self.beta = nn.Parameter(torch.zeros(1)) #addition scaler
+    
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True) #mean of everything after batch
+        std = x.std(dim=-1, keepdim=True) #standard deviation
 
+        return self.alpha * (x-mean) / (std + self.epsilon) + self.beta
